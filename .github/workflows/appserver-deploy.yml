@@ -7,7 +7,7 @@ jobs:
     fetch:
         runs-on: ubuntu-latest
         outputs:
-            matrix: ${{ steps.set.outputs.matrix }}
+            matrix: ${{ steps.set.outputs.linode_instances }}
         steps:
             - id: set
               name: Fetch Linode Instances
