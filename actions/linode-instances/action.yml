@@ -12,14 +12,12 @@ inputs:
   branch:
     description: 'The branch to deploy'
     required: false
-    default: '${{ github.ref }}'
   linode_token:
     description: 'Linode Personal Access Token'
     required: true
   git_repo:
     description: 'The git repository to deploy'
     required: false
-    default: '${{ github.repository }}'
 
 runs:
   using: "composite"
