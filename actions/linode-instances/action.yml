@@ -27,8 +27,17 @@ runs:
     - name: Setup branch and repository
       shell: bash
       run: |
-        echo "BRANCH=${{ inputs.branch || env.GITHUB_REF#refs/heads/ }}" >> $GITHUB_ENV
-        echo "REPO=${{ inputs.git_repo || env.GITHUB_REPOSITORY#*/ }}" >> $GITHUB_ENV
+        BRANCH="${{ inputs.branch }}"
+        if [ -z "$BRANCH" ]; then
+          BRANCH="${GITHUB_REF#refs/heads/}"
+        fi
+        echo "BRANCH=$BRANCH" >> $GITHUB_ENV
+        
+        REPO="${{ inputs.git_repo }}"
+        if [ -z "$REPO" ]; then
+          REPO="${GITHUB_REPOSITORY#*/}"
+        fi
+        echo "REPO=$REPO" >> $GITHUB_ENV
 
     - name: Setup environment
       shell: bash
