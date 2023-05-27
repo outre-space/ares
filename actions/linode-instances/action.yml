@@ -43,6 +43,7 @@ runs:
           | jq -c '.data[] | select((.tags[] | contains("environment:" + "${{ env.ENVIRONMENT }}")) and (.tags[] | contains("vcs:${{ inputs.git_repo }}")))' \
           > linode_instances.json
         echo "::set-output name=linode_instances::$(jq -r '[.[] | .ipv4[0]]' linode_instances.json)"
+        cat linode_instances.json
       id: linode_instances
 
 outputs:

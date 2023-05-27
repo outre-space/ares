@@ -1,6 +1,7 @@
 name: Deploy AppServer
 on:
     workflow_dispatch:
+    push:
 
 jobs:
     fetch:
