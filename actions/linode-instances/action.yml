@@ -55,7 +55,7 @@ runs:
           https://api.linode.com/v4/linode/instances \
           | jq -c '.data[] | select((.tags[] | contains("environment:" + "${{ env.ENVIRONMENT }}")) and (.tags[] | contains("vcs:${{ env.REPO }}")))' \
           > linode_instances.json
-        INSTANCES=$(jq -cs '[.[] | .ipv4[0]]' linode_instances.json)
+        INSTANCES=$(jq -cs '[.[] | {"name": .label, "ssh_host":.ipv4[0]}]' linode_instances.json)
         if [ -z "$INSTANCES" ]; then
             INSTANCES="[]"
         fi

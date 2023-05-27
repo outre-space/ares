@@ -9,25 +9,25 @@ jobs:
         outputs:
             matrix: ${{ steps.set.outputs.linode_instances }}
         steps:
-            - id: set
-              name: Fetch Linode Instances
-              uses: outre-space/ares/actions/linode-instances@main
-              with:
-                  linode_token: ${{ secrets.LINODE_TOKEN }}
+            -   id: set
+                name: Fetch Linode Instances
+                uses: outre-space/ares/actions/linode-instances@main
+                with:
+                    linode_token: ${{ secrets.LINODE_TOKEN }}
 
     deploy:
+        name: "[${{ matrix.name }}]"
         needs: fetch
         runs-on: ubuntu-latest
         strategy:
-            matrix:
-                host: ${{ fromJson(needs.fetch.outputs.matrix) }}
+            matrix: ${{ fromJson(needs.fetch.outputs.matrix) }}
+            fail-fast: false
         steps:
-            - name: Use Universal Deploy Action
-              uses: outre-space/ares/actions/docker-compose@main
-              with:
-                  ssh_host: ${{ matrix.host }}
-                  ssh_user: ${{ secrets.SSH_USER }}
-                  ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-                  environment: '${{ github.ref }}'
-                  env_vars: |
-                    DATABASE_URL=${{ secrets.PROD_DATABASE_URL }}
+            -   name: Use Universal Deploy Action
+                uses: outre-space/ares/actions/docker-compose@main
+                with:
+                    ssh_host: ${{ matrix.ssh_host }}
+                    ssh_user: ${{ secrets.SSH_USER }}
+                    ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+                    env_vars: |
+                        DATABASE_URL=${{ secrets.PROD_DATABASE_URL }}
