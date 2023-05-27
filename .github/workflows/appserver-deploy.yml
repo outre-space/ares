@@ -1,0 +1,32 @@
+name: Deploy
+on:
+    workflow_dispatch:
+
+jobs:
+    fetch:
+        runs-on: ubuntu-latest
+        outputs:
+            matrix: ${{ steps.set.outputs.matrix }}
+        steps:
+            - id: set
+              name: Fetch Linode Instances
+              uses: outre-space/ares/linode-instances@main
+              with:
+                  linode_token: ${{ secrets.LINODE_TOKEN }}
+
+    deploy:
+        needs: fetch
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                host: ${{ fromJson(needs.fetch.outputs.matrix) }}
+        steps:
+            - name: Use Universal Deploy Action
+              uses: outre-space/ares/docker-compose@main
+              with:
+                  hosts: ${{ matrix.host }}
+                  ssh_user: ${{ secrets.SSH_USER }}
+                  ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  environment: '${{ github.ref }}'
+                  env_vars: |
+                    DATABASE_URL=${{ secrets.PROD_DATABASE_URL }}

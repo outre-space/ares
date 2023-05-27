@@ -1,0 +1,49 @@
+name: 'Deploy to Hosts'
+description: 'Deploy Docker Compose project to provided hosts'
+
+inputs:
+  ssh_host:
+    description: 'The host to deploy to'
+    required: true
+  ssh_user:
+    description: 'SSH user'
+    required: false
+    default: root
+  ssh_private_key:
+    description: 'SSH private key'
+    required: true
+  compose_project:
+    description: 'The git repository to deploy'
+    required: false
+    default: app
+  compose_file:
+    description: 'The environment to deploy'
+    required: false
+    default: docker-compose.yml
+  env_vars:
+    description: 'The environment variables to update in the compose file as a .env style string'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Update environment variables
+      shell: bash
+      run: |
+        while IFS= read -r line
+        do
+            IFS="=" read -a STR <<< "$line"
+            sed -i "s/\${${STR[0]}}/${STR[1]}/g" ${{ inputs.compose_file }}
+        done <<< "${{ inputs.env_vars }}"
+      
+   -   name: Docker-Compose Remote Deployment
+       uses: alex-ac/github-action-ssh-docker-compose@master
+       with:
+           ssh_host: ${{ inputs.ssh_host }}
+           ssh_private_key: ${{ inputs.ssh_private_key }}
+           ssh_user: ${{ inputs.ssh_user }}
+           docker_compose_prefix: "${{ inputs.compose_project }}"
+           docker_compose_filename: "${{ inputs.compose_file }}"
