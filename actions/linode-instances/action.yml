@@ -17,20 +17,26 @@ inputs:
     description: 'Linode Personal Access Token'
     required: true
   git_repo:
-      description: 'The git repository to deploy'
-      required: false
-      default: '${{ github.repository }}'
+    description: 'The git repository to deploy'
+    required: false
+    default: '${{ github.repository }}'
 
 runs:
   using: "composite"
   steps:
+    - name: Setup branch and repository
+      shell: bash
+      run: |
+        echo "BRANCH=${{ inputs.branch || env.GITHUB_REF#refs/heads/ }}" >> $GITHUB_ENV
+        echo "REPO=${{ inputs.git_repo || env.GITHUB_REPOSITORY#*/ }}" >> $GITHUB_ENV
+
     - name: Setup environment
       shell: bash
       run: |
         while IFS= read -r line
         do
             IFS="=" read -a STR <<< "$line"
-            if [ "${{ inputs.branch }}" == "${STR[1]}" ]; then
+            if [ "${{ env.BRANCH }}" == "${STR[1]}" ]; then
                 echo "ENVIRONMENT=${STR[0]}" >> $GITHUB_ENV
             fi
         done <<< "${{ inputs.environment }}"
@@ -40,10 +46,13 @@ runs:
       run: |
         curl -H "Authorization: Bearer ${{ inputs.linode_token }}" \
           https://api.linode.com/v4/linode/instances \
-          | jq -c '.data[] | select((.tags[] | contains("environment:" + "${{ env.ENVIRONMENT }}")) and (.tags[] | contains("vcs:${{ inputs.git_repo }}")))' \
+          | jq -c '.data[] | select((.tags[] | contains("environment:" + "${{ env.ENVIRONMENT }}")) and (.tags[] | contains("vcs:${{ env.REPO }}")))' \
           > linode_instances.json
-        echo "::set-output name=linode_instances::$(jq -r '[.[] | .ipv4[0]]' linode_instances.json)"
-        cat linode_instances.json
+        INSTANCES=$(jq -r '[.[] | .ipv4[0]]' linode_instances.json)
+        if [ -z "$INSTANCES" ]; then
+            INSTANCES="[]"
+        fi
+        echo "::set-output name=linode_instances::$INSTANCES"
       id: linode_instances
 
 outputs:

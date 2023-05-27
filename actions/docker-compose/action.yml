@@ -38,12 +38,12 @@ runs:
             IFS="=" read -a STR <<< "$line"
             sed -i "s/\${${STR[0]}}/${STR[1]}/g" ${{ inputs.compose_file }}
         done <<< "${{ inputs.env_vars }}"
-      
-   -   name: Docker-Compose Remote Deployment
-       uses: alex-ac/github-action-ssh-docker-compose@master
-       with:
-           ssh_host: ${{ inputs.ssh_host }}
-           ssh_private_key: ${{ inputs.ssh_private_key }}
-           ssh_user: ${{ inputs.ssh_user }}
-           docker_compose_prefix: "${{ inputs.compose_project }}"
-           docker_compose_filename: "${{ inputs.compose_file }}"
+
+    - name: Docker-Compose Remote Deployment
+      uses: alex-ac/github-action-ssh-docker-compose@master
+      with:
+        ssh_host: ${{ inputs.ssh_host }}
+        ssh_private_key: ${{ inputs.ssh_private_key }}
+        ssh_user: ${{ inputs.ssh_user }}
+        docker_compose_prefix: "${{ inputs.compose_project }}"
+        docker_compose_filename: "${{ inputs.compose_file }}"
