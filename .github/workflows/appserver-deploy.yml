@@ -25,7 +25,7 @@ jobs:
             - name: Use Universal Deploy Action
               uses: outre-space/ares/actions/docker-compose@main
               with:
-                  hosts: ${{ matrix.host }}
+                  ssh_host: ${{ matrix.host }}
                   ssh_user: ${{ secrets.SSH_USER }}
                   ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
                   environment: '${{ github.ref }}'
